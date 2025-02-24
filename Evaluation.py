@@ -12,7 +12,6 @@ import spacy
 # Load environment variables
 load_dotenv()
 
-import spacy
 try:
     nlp = spacy.load("en_core_web_sm")
 except Exception:
