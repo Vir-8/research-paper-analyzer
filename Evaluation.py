@@ -12,13 +12,6 @@ import spacy
 # Load environment variables
 load_dotenv()
 
-try:
-    nlp = spacy.load("en_core_web_sm")
-except Exception:
-    import spacy.cli
-    spacy.cli.download("en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
-
 # Initialize spaCy model
 nlp = spacy.load("en_core_web_sm")
 
