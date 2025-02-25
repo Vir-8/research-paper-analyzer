@@ -1,4 +1,3 @@
-```markdown
 # Research Paper Analyzer
 
 ## Overview
@@ -68,4 +67,3 @@ Experience the tool in action: [Research Paper Analyzer](https://research-paper-
 ---
 
 Give it a try and see how much time it saves you! ⏳🚀
-```
