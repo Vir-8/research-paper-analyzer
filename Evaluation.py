@@ -233,3 +233,22 @@ if uploaded_file:
                         f"<strong>Bot:</strong> {msg['content']}</div>",
                         unsafe_allow_html=True
                     )
+
+# Hide the default Streamlit footer
+hide_streamlit_style = """
+    <style>
+    footer {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# Add your custom footer with multiple GitHub accounts
+st.markdown(
+    """
+    <div style="text-align: center; font-size: 14px; color: #888;">
+        Made with ❤️ by <a href="https://github.com/rjm2007" target="_blank">Rudraksh Mehta</a> &amp; 
+        <a href="https://github.com/vir-8" target="_blank">Vir Kothari</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
