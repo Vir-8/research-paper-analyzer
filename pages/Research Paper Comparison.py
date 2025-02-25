@@ -1,4 +1,5 @@
 import os
+import time
 import streamlit as st
 from pathlib import Path
 import logging
@@ -59,8 +60,33 @@ st.markdown("Upload **2 to 5 research paper PDFs** to generate a comprehensive c
 
 analyzer = ResearchAnalyzer()
 
-# Use a file uploader that accepts multiple files
-pdf_files = st.file_uploader("Upload PDF files", type=["pdf"], accept_multiple_files=True, key="pdf_files")
+# Initialize a dynamic key for the file uploader if not already set
+if "uploader_key" not in st.session_state:
+    st.session_state["uploader_key"] = "uploader_1"
+
+# Create a placeholder to hold the file uploader widget
+uploader_placeholder = st.empty()
+
+# Reset button to start a new comparison
+if st.button("🔄 Start New Comparison"):
+    # Update the uploader key with a unique value
+    st.session_state["uploader_key"] = f"uploader_{time.time()}"
+    # Clear any stored PDF text and comparison data
+    for key in list(st.session_state.keys()):
+        if key.startswith("pdf_text") or key == "comparison":
+            st.session_state.pop(key, None)
+    # Reinitialize the uploader by emptying the placeholder
+    uploader_placeholder.empty()
+    # Optional: if you have access to st.experimental_rerun(), you can uncomment the following line
+    # st.experimental_rerun()
+
+# Use the placeholder to render the file uploader with the dynamic key.
+pdf_files = uploader_placeholder.file_uploader(
+    "Upload PDF files",
+    type=["pdf"],
+    accept_multiple_files=True,
+    key=st.session_state["uploader_key"]
+)
 
 if pdf_files:
     if not (2 <= len(pdf_files) <= 5):
@@ -70,34 +96,21 @@ if pdf_files:
         # Loop over each uploaded file and extract text
         for i, pdf_file in enumerate(pdf_files, start=1):
             key = f"pdf_text{i}"
-            if key not in st.session_state:
-                with st.spinner(f"Extracting text from PDF {i}..."):
-                    text = analyzer.extract_text_from_pdf(pdf_file)
-                    if text.startswith("ERROR"):
-                        st.error(f"⚠️ Failed to extract text from PDF {i}. Please try another file.")
-                    else:
-                        st.session_state[key] = text
-                        st.success(f"✅ PDF {i} text extracted successfully!")
-                        texts.append(text)
-            else:
-                texts.append(st.session_state[key])
+            with st.spinner(f"Extracting text from PDF {i}..."):
+                text = analyzer.extract_text_from_pdf(pdf_file)
+                if text.startswith("ERROR"):
+                    st.error(f"⚠️ Failed to extract text from PDF {i}. Please try another file.")
+                else:
+                    st.session_state[key] = text
+                    st.success(f"✅ PDF {i} text extracted successfully!")
+                    texts.append(text)
         # If texts for all files are available, generate comparative analysis
         if len(texts) == len(pdf_files):
-            if "comparison" not in st.session_state:
-                with st.spinner("Generating comparative analysis..."):
-                    comparison = analyzer.compare_papers(texts)
-                    st.session_state.comparison = comparison
+            with st.spinner("Generating comparative analysis..."):
+                comparison = analyzer.compare_papers(texts)
+                st.session_state.comparison = comparison
             st.markdown(st.session_state.comparison)
 
-# Hide the default Streamlit footer
-hide_streamlit_style = """
-    <style>
-    footer {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-# Add your custom footer with multiple GitHub accounts
 st.markdown(
     """
     <div style="text-align: center; font-size: 14px; color: #888;">

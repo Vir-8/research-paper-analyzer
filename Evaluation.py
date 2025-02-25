@@ -154,25 +154,26 @@ st.markdown("Upload a **research paper PDF** to get both an AI-generated literat
 uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
 
 if uploaded_file:
-    if "pdf_text" not in st.session_state:
-        with st.spinner("Extracting text from PDF..."):
-            analyzer = ResearchAnalyzer()
-            pdf_text = analyzer.extract_text_from_pdf(uploaded_file)
-            if pdf_text.startswith("ERROR"):
-                st.error("⚠️ Failed to extract text from the PDF. Please try another file.")
-            else:
-                st.session_state.pdf_text = pdf_text
-                st.success("✅ Text extracted successfully!")
+    # Clear previous session state for a new file upload
+    st.session_state.pop("pdf_text", None)
+    st.session_state.pop("analysis", None)
     
-    if "analysis" not in st.session_state and "pdf_text" in st.session_state:
-        with st.spinner("Generating AI analysis..."):
-            analyzer = ResearchAnalyzer()
-            analysis = analyzer.analyze_paper(st.session_state.pdf_text)
-            st.session_state.analysis = analysis
+    analyzer = ResearchAnalyzer()
+    
+    with st.spinner("Extracting text from PDF..."):
+        pdf_text = analyzer.extract_text_from_pdf(uploaded_file)
+        if pdf_text.startswith("ERROR"):
+            st.error("⚠️ Failed to extract text from the PDF. Please try another file.")
+        else:
+            st.session_state.pdf_text = pdf_text
+            st.success("✅ Text extracted successfully!")
+    
+    with st.spinner("Generating AI analysis..."):
+        analysis = analyzer.analyze_paper(st.session_state.pdf_text)
+        st.session_state.analysis = analysis
 
     # Layout: Left column for literature review summary
     col_left, col_right = st.columns([3, 2])
-    
     with col_left:
         st.subheader("📑 Literature Review Summary")
         st.markdown(st.session_state.analysis)
